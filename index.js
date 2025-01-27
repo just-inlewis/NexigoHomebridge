@@ -5,8 +5,9 @@ let Service, Characteristic;
 
 // Simple input map for demonstration
 const inputMap = {
-  1: "Apple TV",
-  2: "PlayStation",
+  1: "Menu",
+  2: "Apple TV",
+  3: "PlayStation",
 };
 
 module.exports = (homebridge) => {
@@ -121,11 +122,15 @@ function TelevisionAccessory(log, config) {
       this.log("INPUT: Switching to =>", inputName);
       switch (newValue) {
         case 1:
+          this.sendKeyEvent(3, (err, success) => {
+            callback(err);
+          });
+        case 2:
           this.sendKeyEvent([178, 21, 21, 21, 22, 66], (err, success) => {
             callback(err);
           });
           break;
-        case 2:
+        case 3:
           this.sendKeyEvent([178, 21, 21, 21, 22, 22, 66], (err, success) => {
             callback(err);
           });
@@ -194,7 +199,7 @@ function TelevisionAccessory(log, config) {
           break;
         case Characteristic.RemoteKey.INFORMATION:
           this.log("REMOTE: Menu");
-          this.sendKeyEvent(3, (err, success) => {
+          this.sendKeyEvent(82, (err, success) => {
             callback(err);
           });
           break;
@@ -204,11 +209,12 @@ function TelevisionAccessory(log, config) {
       }
     });
 
-  // Create example inputs (HDMI1, HDMI2)
-  this.inputHDMI1Service = createInputSource("hdmi1", "Apple TV", 1);
-  this.inputHDMI2Service = createInputSource("hdmi2", "PlayStation", 2);
+  this.inputMenuService = createInputSource("menu", "Menu", 1, Characteristic.InputSourceType.OTHER);
+  this.inputHDMI1Service = createInputSource("hdmi1", "Apple TV", 2, Characteristic.InputSourceType.HDMI);
+  this.inputHDMI2Service = createInputSource("hdmi2", "PlayStation", 3, Characteristic.InputSourceType.HDMI);
 
   // Link them
+  this.tvService.addLinkedService(this.inputMenuService);
   this.tvService.addLinkedService(this.inputHDMI1Service);
   this.tvService.addLinkedService(this.inputHDMI2Service);
 
@@ -251,6 +257,7 @@ function TelevisionAccessory(log, config) {
   // Add everything to the accessory
   this.tvService.addLinkedService(this.speakerService);
   this.enabledServices.push(this.tvService);
+  this.enabledServices.push(this.inputMenuService);
   this.enabledServices.push(this.inputHDMI1Service);
   this.enabledServices.push(this.inputHDMI2Service);
   this.enabledServices.push(this.speakerService);
@@ -262,12 +269,12 @@ TelevisionAccessory.prototype.getServices = function () {
 };
 
 // Helper: Create InputSource
-function createInputSource(id, name, number) {
+function createInputSource(id, name, number, type) {
   const inputService = new Service.InputSource(id, name);
   inputService
     .setCharacteristic(Characteristic.Identifier, number)
     .setCharacteristic(Characteristic.ConfiguredName, name)
     .setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED)
-    .setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.HDMI);
+    .setCharacteristic(Characteristic.InputSourceType, type);
   return inputService;
 }
