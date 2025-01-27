@@ -122,12 +122,12 @@ function TelevisionAccessory(log, config) {
       switch (newValue) {
         case 1:
           this.sendKeyEvent([178, 21, 21, 21, 22, 66], (err, success) => {
-            callback();
+            callback(err);
           });
           break;
         case 2:
           this.sendKeyEvent([178, 21, 21, 21, 22, 22, 66], (err, success) => {
-            callback();
+            callback(err);
           });
           break;
       }
@@ -144,50 +144,50 @@ function TelevisionAccessory(log, config) {
         case Characteristic.RemoteKey.ARROW_UP:
           this.log("REMOTE: Up");
           this.sendKeyEvent(19, (err, success) => {
-            callback();
+            callback(err);
           });
           break;
         case Characteristic.RemoteKey.ARROW_DOWN:
           this.log("REMOTE: Down");
           this.sendKeyEvent(20, (err, success) => {
-            callback();
+            callback(err);
           });
           break;
         case Characteristic.RemoteKey.ARROW_LEFT:
           this.log("REMOTE: Left");
           this.sendKeyEvent(21, (err, success) => {
-            callback();
+            callback(err);
           });
           break;
         case Characteristic.RemoteKey.ARROW_RIGHT:
           this.log("REMOTE: Right");
           this.sendKeyEvent(22, (err, success) => {
-            callback();
+            callback(err);
           });
           break;
         case Characteristic.RemoteKey.SELECT:
           this.log("REMOTE: Select");
           this.sendKeyEvent(66, (err, success) => {
-            callback();
+            callback(err);
           });
           break;
         case Characteristic.RemoteKey.BACK:
           this.log("REMOTE: Back");
           this.sendKeyEvent(4, (err, success) => {
-            callback();
+            callback(err);
           });
           break;
         case Characteristic.RemoteKey.PLAY_PAUSE:
           if (this.isCurrentlyPlaying) {
             this.log("REMOTE: Pause");
             this.sendKeyEvent(127, (err, success) => {
-              callback();
+              callback(err);
             });
             this.isCurrentlyPlaying = false;
           } else {
             this.log("REMOTE: Play");
             this.sendKeyEvent(126, (err, success) => {
-              callback();
+              callback(err);
             });
             this.isCurrentlyPlaying = true;
           }
@@ -195,7 +195,7 @@ function TelevisionAccessory(log, config) {
         case Characteristic.RemoteKey.INFORMATION:
           this.log("REMOTE: Menu");
           this.sendKeyEvent(3, (err, success) => {
-            callback();
+            callback(err);
           });
           break;
         default:
@@ -226,7 +226,7 @@ function TelevisionAccessory(log, config) {
   .on("set", (newValue, callback) => {
     this.log("SPEAKER: Mute");
     this.sendKeyEvent(164, (err, success) => {
-      callback();
+      callback(err);
     });
   });
 
@@ -238,12 +238,12 @@ function TelevisionAccessory(log, config) {
       if (newValue === 0) {
         this.log("SPEAKER: Volume Up");
         this.sendKeyEvent(24, (err, success) => {
-          callback();
+          callback(err);
         });
       } else {
         this.log("SPEAKER: Volume Down");
         this.sendKeyEvent(25, (err, success) => {
-          callback();
+          callback(err);
         });
       }
     });
