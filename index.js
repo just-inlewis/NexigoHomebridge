@@ -117,6 +117,7 @@ function TelevisionAccessory(log, config) {
           this.sendKeyEvent(3, (err, success) => {
             callback(err);
           });
+          break;
         case 2:
           this.sendKeyEvent([178, 21, 21, 21, 22, 66], (err, success) => {
             callback(err);
@@ -201,7 +202,7 @@ function TelevisionAccessory(log, config) {
       }
     });
 
-  this.inputMenuService = createInputSource("menu", "Menu", 1, Characteristic.InputSourceType.HDMI);
+  this.inputMenuService = createInputSource("menu", "Menu", 1, Characteristic.InputSourceType.OTHER);
   this.inputHDMI1Service = createInputSource("hdmi1", "Apple TV", 2, Characteristic.InputSourceType.HDMI);
   this.inputHDMI2Service = createInputSource("hdmi2", "PlayStation", 3, Characteristic.InputSourceType.HDMI);
 
