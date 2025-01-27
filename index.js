@@ -201,7 +201,7 @@ function TelevisionAccessory(log, config) {
       }
     });
 
-  this.inputMenuService = createInputSource("menu", "Menu", 1, Characteristic.InputSourceType.OTHER);
+  this.inputMenuService = createInputSource("menu", "Menu", 1, Characteristic.InputSourceType.HDMI);
   this.inputHDMI1Service = createInputSource("hdmi1", "Apple TV", 2, Characteristic.InputSourceType.HDMI);
   this.inputHDMI2Service = createInputSource("hdmi2", "PlayStation", 3, Characteristic.InputSourceType.HDMI);
 
