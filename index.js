@@ -3,13 +3,6 @@ const dns = require("dns");
 
 let Service, Characteristic;
 
-// Simple input map for demonstration
-const inputMap = {
-  1: "Menu",
-  2: "Apple TV",
-  3: "PlayStation",
-};
-
 module.exports = (homebridge) => {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
@@ -118,8 +111,7 @@ function TelevisionAccessory(log, config) {
   this.tvService
     .getCharacteristic(Characteristic.ActiveIdentifier)
     .on("set", (newValue, callback) => {
-      const inputName = inputMap[newValue];
-      this.log("INPUT: Switching to =>", inputName);
+      this.log("INPUT: Switching to =>", newValue);
       switch (newValue) {
         case 1:
           this.sendKeyEvent(3, (err, success) => {
