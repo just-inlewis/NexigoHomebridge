@@ -37,16 +37,27 @@ function TelevisionAccessory(log, config) {
   this.isCurrentlyPlaying = false;
 
   this.sendKeyEvent = async (keys, callback) => {
-    const sendSingleKeyEvent = (key) => {
+    const resolveHostname = async () => {
+      try {
+        const address = await dns.lookup(this.hostname, { family: 4 });
+        this.log(`Resolved hostname ${this.hostname} to IP ${address.address}`);
+        return address.address;
+      } catch (err) {
+        this.log.error(`DNS Lookup failed for ${this.hostname}: ${err.message}`);
+        throw new Error(`DNS Lookup failed for ${this.hostname}: ${err.message}`);
+      }
+    };
+
+    const sendSingleKeyEvent = (key, address) => {
       return new Promise((resolve, reject) => {
         const message = `KEYEVENT\r\n${key}\r\n`;
-        this.log(`SENDING: ${message.trim()} -> ${this.hostname}:${this.port}`);
-        const client = net.createConnection({ host: this.hostname, port: this.port }, () => {
+        this.log(`SENDING: ${message.trim()} -> ${address}:${this.port}`);
+        const client = net.createConnection({ host: address, port: this.port }, () => {
           client.write(message);
           client.end();
         });
         client.on("error", (err) => {
-          this.log.error(`Error sending key event to ${this.hostname}:${this.port} => ${err.message}`);
+          this.log.error(`Error sending key event to ${address}:${this.port} => ${err.message}`);
           reject(err);
         });
         client.on("close", () => {
@@ -60,8 +71,10 @@ function TelevisionAccessory(log, config) {
     }
   
     try {
+      const address = await resolveHostname();
+
       for (let i = 0; i < keys.length; i++) {
-        await sendSingleKeyEvent(keys[i]);
+        await sendSingleKeyEvent(keys[i], address);
         if (i < keys.length - 1) {
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
