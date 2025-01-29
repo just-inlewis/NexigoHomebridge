@@ -38,52 +38,59 @@ function TelevisionAccessory(log, config) {
 
   this.sendKeyEvent = async (keys, callback) => {
     const resolveHostname = async () => {
-      try {
-        const address = await dns.lookup(this.hostname, { family: 4 });
-        this.log(`Resolved hostname ${this.hostname} to IP ${address.address}`);
-        return address.address;
-      } catch (err) {
-        this.log.error(`DNS Lookup failed for ${this.hostname}: ${err.message}`);
-        throw new Error(`DNS Lookup failed for ${this.hostname}: ${err.message}`);
-      }
+        try {
+            const address = await dns.lookup(this.hostname, { family: 4 });
+            this.log(`Resolved hostname ${this.hostname} to IP ${address.address}`);
+            return address.address;
+        } catch (err) {
+            this.log.error(`DNS Lookup failed for ${this.hostname}: ${err.message}`);
+            throw err;
+        }
     };
 
     const sendSingleKeyEvent = (key, address) => {
-      return new Promise((resolve, reject) => {
-        const message = `KEYEVENT\r\n${key}\r\n`;
-        this.log(`SENDING: ${message.trim()} -> ${address}:${this.port}`);
-        const client = net.createConnection({ host: address, port: this.port }, () => {
-          client.write(message);
-          client.end();
+        return new Promise((resolve, reject) => {
+            const message = `KEYEVENT\r\n${key}\r\n`;
+            this.log(`SENDING: ${message.trim()} -> ${address}:${this.port}`);
+            const client = net.createConnection({ host: address, port: this.port }, () => {
+                client.write(message);
+                client.end();
+            });
+            client.on("error", (err) => {
+                this.log.error(`Error sending key event to ${address}:${this.port} => ${err.message}`);
+                reject(err);
+            });
+            client.on("close", () => {
+                resolve();
+            });
         });
-        client.on("error", (err) => {
-          this.log.error(`Error sending key event to ${address}:${this.port} => ${err.message}`);
-          reject(err);
-        });
-        client.on("close", () => {
-          resolve();
-        });
-      });
     };
-  
-    if (!Array.isArray(keys)) {
-      keys = [keys];
-    }
-  
-    try {
-      const address = await resolveHostname();
 
-      for (let i = 0; i < keys.length; i++) {
-        await sendSingleKeyEvent(keys[i], address);
-        if (i < keys.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
+    if (!Array.isArray(keys)) {
+        keys = [keys];
+    }
+
+    try {
+        const address = await resolveHostname();
+
+        for (let i = 0; i < keys.length; i++) {
+            await sendSingleKeyEvent(keys[i], address);
+            if (i < keys.length - 1) {
+                await new Promise((resolve) => setTimeout(resolve, 100));
+            }
         }
-      }
-      this.log(`All keys sent successfully to ${this.hostname}:${this.port}`);
-      if (callback) callback(null, true);
+
+        this.log(`All keys sent successfully to ${this.hostname}:${this.port}`);
+
+        if (typeof callback === 'function') {
+            callback(null, true);
+        }
     } catch (error) {
-      this.log.error(`Failed to send keys to ${this.hostname}:${this.port}: ${error.message}`);
-      if (callback) callback(error, false);
+        this.log.error(`Failed to send keys to ${this.hostname}:${this.port}: ${error.message}`);
+
+        if (typeof callback === 'function') {
+            callback(error, false);
+        }
     }
   };
   
