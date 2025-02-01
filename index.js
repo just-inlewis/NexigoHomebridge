@@ -40,10 +40,8 @@ function TelevisionAccessory(log, config) {
     const resolveHostname = async () => {
       try {
         const address = await dns.lookup(this.hostname, { family: 4 });
-        this.log(`Resolved hostname ${this.hostname} to IP ${address.address}`);
         return address.address;
       } catch (err) {
-        this.log.error(`DNS Lookup failed for ${this.hostname}: ${err.message}`);
         throw new Error(`DNS Lookup failed for ${this.hostname}: ${err.message}`);
       }
     };
@@ -79,7 +77,6 @@ function TelevisionAccessory(log, config) {
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
       }
-      this.log(`All keys sent successfully to ${this.hostname}:${this.port}`);
       if (callback) callback(null, true);
     } catch (error) {
       this.log.error(`Failed to send keys to ${this.hostname}:${this.port}: ${error.message}`);
